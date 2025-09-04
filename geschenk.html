@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Geschenk Explosion Deluxe</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #000 url('images/Karli.png') center/cover no-repeat;
+      font-family: 'Segoe UI', sans-serif;
+      position: relative;
+    }
+
+    #gift {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      font-size: 8rem;
+      cursor: pointer;
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    #message {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 2rem;
+      color: white;
+      z-index: 5;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #white-blink {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: white;
+      opacity: 0;
+      z-index: 100;
+      transition: opacity 2s ease;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="message">Jetzt du!</div>
+<div id="gift" title="Klick mich!">🎁</div>
+<canvas id="canvas"></canvas>
+<div id="white-blink"></div>
+
+<audio id="boom-sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b2c36bb2a0.mp3?filename=explosion-6055.mp3"></audio>
+
+<script>
+  const gift = document.getElementById('gift');
+  const message = document.getElementById('message');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const whiteBlink = document.getElementById('white-blink');
+  const boomSound = document.getElementById('boom-sound');
+
+  let w, h;
+  function resize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor(x, y, color, size, speedX, speedY) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.size = size;
+      this.speedX = speedX;
+      this.speedY = speedY;
+      this.opacity = 1;
+      this.gravity = 0.1;
+      this.friction = 0.96;
+    }
+
+    update() {
+      this.speedX *= this.friction;
+      this.speedY = this.speedY * this.friction + this.gravity;
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.opacity -= 0.015;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.opacity;
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  let particles = [];
+
+  function createExplosion(x, y, count = 200) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * 2 * Math.PI;
+      const speed = Math.random() * 12 + 4;
+      const size = Math.random() * 6 + 2;
+      const color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+      particles.push(new Particle(
+        x,
+        y,
+        color,
+        size,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed
+      ));
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach((p, index) => {
+      p.update();
+      p.draw();
+      if (p.opacity <= 0) particles.splice(index, 1);
+    });
+
+    if (particles.length > 0) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  gift.addEventListener('click', () => {
+    // Sound abspielen
+    boomSound.currentTime = 0;
+    boomSound.play();
+
+    // Geschenk verschwindet
+    gift.style.transform = 'scale(0)';
+    message.style.display = 'none';
+
+    // Startpunkt der Explosion berechnen (Geschenkposition)
+    const rect = gift.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Explosion starten
+    createExplosion(centerX, centerY, 300);
+    animate();
+
+    // Weitere Partikel in Wellen nach 500ms
+    let waveCount = 0;
+    const waveInterval = setInterval(() => {
+      createExplosion(Math.random() * w, Math.random() * h, 150);
+      if (++waveCount >= 5) clearInterval(waveInterval);
+    }, 400);
+
+    // Weißblitz langsam einblenden nach 2 Sekunden
+    setTimeout(() => {
+      whiteBlink.style.opacity = 1;
+    }, 2500);
+
+    // Nach dem Blend-Übergang Seite wechseln
+    setTimeout(() => {
+      window.location.href = 'Kinokarten.html'; // ❗ Hier deine ZIELseite einsetzen
+    }, 4500);
+  });
+</script>
+
+</body>
+</html>

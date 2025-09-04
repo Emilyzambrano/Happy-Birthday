@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kino-Geschenk</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      overflow: hidden;
+      background-image: url('images/Kino.jpg'); /* <- DEIN Hintergrundbild */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      backdrop-filter: brightness(0.95);
+    }
+
+    /* 🐱 Katze mit Schwimmbewegung + horizontalem Gleiten */
+    .cat-wrapper {
+      position: absolute;
+      top: 20%; /* weiter oben im Bild */
+      left: 60%; /* weiter rechts starten */
+      width: 180px;
+      animation: swim-horizontal 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes swim-horizontal {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-150px); } /* nach links und zurück */
+    }
+
+    .cat-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .cat-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .cat1 { opacity: 1; }
+    .cat2 { opacity: 0; }
+
+    /* 💭 Gedankenblase */
+    .thought {
+      position: absolute;
+      top: -70px;
+      left: -80px;
+      width: 200px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #333;
+      padding: 12px;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-style: italic;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .thought::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 30px;
+      width: 10px;
+      height: 10px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      box-shadow: 10px 10px 0 0 rgba(255,255,255,0.8);
+    }
+
+    /* 💬 Sprechblase */
+    .speech {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(3px);
+      display: inline-block;
+    }
+
+    /* 🎟️ Tickets */
+    .tickets {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .ticket {
+      background: #ff3c3c;
+      color: #fff;
+      padding: 20px 30px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      box-shadow: 0 0 10px rgba(255, 60, 60, 0.6);
+      transform: rotate(-3deg);
+      animation: wiggle 1.5s infinite ease-in-out;
+    }
+
+    .ticket:nth-child(2) {
+      transform: rotate(2deg);
+      background: #ffd93c;
+      color: #000;
+      box-shadow: 0 0 10px rgba(255, 217, 60, 0.6);
+    }
+
+    .ticket:nth-child(3) {
+      transform: rotate(-1deg);
+      background: #3cffff;
+      color: #000;
+      box-shadow: 0 0 10px rgba(60, 255, 255, 0.6);
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: translateY(0) rotate(var(--angle)); }
+      50% { transform: translateY(-5px) rotate(var(--angle)); }
+    }
+
+    /* 🍿 Popcorn-Konfetti */
+    .popcorn {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Emoji_u1f37f.svg/72px-Emoji_u1f37f.svg.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(-100px); opacity: 1; }
+      to { transform: translateY(110vh); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 🐱 Schwimmkatze + Gedankenblase -->
+<div class="cat-wrapper">
+  <div class="cat-container">
+    <div class="thought">Pfu, 22 Bahnen sind ganz schön viel…</div>
+    <img src="images/karliSchwimmt.jpg" class="cat1" id="cat1" alt="Katze Schwimmbewegung 1" />
+    <img src="images/karliSchwimmtw.jpg" class="cat2" id="cat2" alt="Katze Schwimmbewegung 2" />
+  </div>
+</div>
+
+<div class="container">
+  <!-- 💬 Sprechblase -->
+  <div class="speech">Bitte Tickets zeigen... 🎬</div>
+
+  <!-- 🎟️ Kinotickets -->
+  <div class="tickets">
+    <div class="ticket" style="--angle: -3deg;">22 Bahnen<br>Ticket #1</div>
+    <div class="ticket" style="--angle: 2deg;">22 Bahnen<br>Ticket #2</div>
+    <div class="ticket" style="--angle: -1deg;">22 Bahnen<br>Ticket #3</div>
+  </div>
+</div>
+
+<!-- 🍿 Popcorn-Konfetti -->
+<script>
+  const count = 30;
+  for (let i = 0; i < count; i++) {
+    const popcorn = document.createElement('div');
+    popcorn.classList.add('popcorn');
+    popcorn.style.left = Math.random() * 100 + 'vw';
+    popcorn.style.animationDuration = 3 + Math.random() * 2 + 's';
+    popcorn.style.animationDelay = Math.random() * 3 + 's';
+    document.body.appendChild(popcorn);
+  }
+
+  // 🐱 Bildwechsel für Schwimmkatze
+  const cat1 = document.getElementById('cat1');
+  const cat2 = document.getElementById('cat2');
+
+  setInterval(() => {
+    if (cat1.style.opacity === "1" || cat1.style.opacity === "") {
+      cat1.style.opacity = "0";
+      cat2.style.opacity = "1";
+    } else {
+      cat1.style.opacity = "1";
+      cat2.style.opacity = "0";
+    }
+  }, 400); // Wechselt alle 400ms
+</script>
+
+</body>
+</html>

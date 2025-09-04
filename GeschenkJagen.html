@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weltraum-Fangspiel mit Bild & Cursor</title>
+<style>
+  body, html {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: black;
+    cursor: url('images/Katze.cur') 16 16, auto;
+    user-select: none;
+    font-family: Arial, sans-serif;
+    color: white;
+  }
+  #fixedText {
+    position: fixed;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    z-index: 10;
+    user-select: none;
+  }
+  #gift {
+    position: absolute;
+    width: 64px; /* gewünschte Größe Bild */
+    height: 64px;
+    pointer-events: auto;
+    user-select: none;
+    transition: left 0.05s linear, top 0.05s linear;
+    z-index: 10;
+    background: url('images/KarliGeschenk.webp') no-repeat center center; /* Pfad zu deinem Geschenkbild */
+    background-size: contain;
+  }
+  canvas {
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+  }
+</style>
+</head>
+<body>
+
+<div id="fixedText">Bevor Karli sein Geschenk nicht kriegt, kriegst du deins natürlich auch nicht!</div>
+<div id="gift"></div>
+<canvas id="stars"></canvas>
+
+<script>
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  const gift = document.getElementById('gift');
+  const fixedText = document.getElementById('fixedText');
+
+  let w, h;
+
+  function resize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Sterne erzeugen
+  const starCount = 150;
+  const stars = [];
+
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  for (let i = 0; i < starCount; i++) {
+    stars.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: Math.random() * 1.5 + 0.5,
+      speed: randomRange(0.1, 0.5)
+    });
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'white';
+
+    stars.forEach(star => {
+      star.y += star.speed;
+      if (star.y > h) star.y = 0;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+  }
+
+  // Maus & Geschenk
+  let giftX = Math.random() * (window.innerWidth - gift.offsetWidth);
+  let giftY = Math.random() * (window.innerHeight - gift.offsetHeight);
+  gift.style.left = giftX + 'px';
+  gift.style.top = giftY + 'px';
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let velocityX = 0;
+  let velocityY = 0;
+
+  let clickCount = 0;
+
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  gift.addEventListener('click', () => {
+    clickCount++;
+
+    if (clickCount === 1) {
+      fixedText.textContent = 'Lecker, aber das reicht ihm natürlich nicht! Noch eins!';
+      teleportGift();
+    } else if (clickCount === 2) {
+      window.location.href = 'geschenk.html'; // Zielseite anpassen
+    }
+  });
+
+  function teleportGift() {
+    giftX = Math.random() * (window.innerWidth - gift.offsetWidth);
+    giftY = Math.random() * (window.innerHeight - gift.offsetHeight);
+    gift.style.left = giftX + 'px';
+    gift.style.top = giftY + 'px';
+    velocityX = 0;
+    velocityY = 0;
+  }
+
+  function update() {
+    drawStars();
+
+    let dx = giftX + gift.offsetWidth / 2 - mouseX;
+    let dy = giftY + gift.offsetHeight / 2 - mouseY;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    let speed = Math.min(20, 300 / dist);
+    let dirX = dx / dist;
+    let dirY = dy / dist;
+
+    velocityX += dirX * speed * 0.5;
+    velocityY += dirY * speed * 0.5;
+
+    velocityX *= 0.8;
+    velocityY *= 0.8;
+
+    giftX += velocityX;
+    giftY += velocityY;
+
+    // Ränder
+    if (giftX < 0) {
+      giftX = 0;
+      velocityX = -velocityX * 0.7;
+    }
+    if (giftY < 0) {
+      giftY = 0;
+      velocityY = -velocityY * 0.7;
+    }
+    if (giftX > window.innerWidth - gift.offsetWidth) {
+      giftX = window.innerWidth - gift.offsetWidth;
+      velocityX = -velocityX * 0.7;
+    }
+    if (giftY > window.innerHeight - gift.offsetHeight) {
+      giftY = window.innerHeight - gift.offsetHeight;
+      velocityY = -velocityY * 0.7;
+    }
+
+    gift.style.left = giftX + 'px';
+    gift.style.top = giftY + 'px';
+
+    requestAnimationFrame(update);
+  }
+
+  update();
+</script>
+
+
+</body>
+</html>
